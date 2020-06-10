@@ -54,8 +54,8 @@ std::string MimeType::getMime(const std::string& suffix)
         return mime[suffix];
 }
 
-//´Ë´¦¹¹ÔìµÄÊÂĞ¡¸ù¶ÑÓÅÏÈ¶ÓÁĞ
-//´ó¸ù¶ÑÓÅÏÈ¶ÓÁĞµÄ¶¨Òå·½Ê½Ó¦¸ÃÎª£º priority_queue<int> q
+//æ­¤å¤„æ„é€ çš„äº‹å°æ ¹å †ä¼˜å…ˆé˜Ÿåˆ—
+//å¤§æ ¹å †ä¼˜å…ˆé˜Ÿåˆ—çš„å®šä¹‰æ–¹å¼åº”è¯¥ä¸ºï¼š priority_queue<int> q
 priority_queue<mytimer*, deque<mytimer*>, timerCmp> myTimerQueue;
 
 requestData::requestData() :
@@ -65,7 +65,7 @@ requestData::requestData() :
     cout << "requestData constructed !" << endl;
 }
 
-//³õÊ¼»¯²ÎÊı
+//åˆå§‹åŒ–å‚æ•°
 requestData::requestData(int _epollfd, int _fd, std::string _path) :
     now_read_pos(0), state(STATE_PARSE_URI), h_state(h_start),
     keep_alive(false), againTimes(0), timer(NULL),
@@ -76,7 +76,7 @@ requestData::~requestData()
 {
     cout << "~requestData()" << endl;
     struct epoll_event ev;
-    // ³¬Ê±µÄÒ»¶¨¶¼ÊÇ¶ÁÇëÇó£¬Ã»ÓĞ"±»¶¯"Ğ´¡£
+    // è¶…æ—¶çš„ä¸€å®šéƒ½æ˜¯è¯»è¯·æ±‚ï¼Œæ²¡æœ‰"è¢«åŠ¨"å†™ã€‚
     ev.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
     ev.data.ptr = (void*)this;
     epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, &ev);
@@ -140,7 +140,7 @@ void requestData::handleRequest()
         }
         else if (read_num == 0)
         {
-            // ÓĞÇëÇó³öÏÖµ«ÊÇ¶Á²»µ½Êı¾İ£¬¿ÉÄÜÊÇRequest Aborted£¬»òÕßÀ´×ÔÍøÂçµÄÊı¾İÃ»ÓĞ´ïµ½µÈÔ­Òò¡£ÉèÖÃÒ»¸öÊ±¼ä½øĞĞÑ­»·µÈ´ı£¬Èç¹û³¬¹ıÉÏÏŞ¾Í±¨´íÌø³ö
+            // æœ‰è¯·æ±‚å‡ºç°ä½†æ˜¯è¯»ä¸åˆ°æ•°æ®ï¼Œå¯èƒ½æ˜¯Request Abortedï¼Œæˆ–è€…æ¥è‡ªç½‘ç»œçš„æ•°æ®æ²¡æœ‰è¾¾åˆ°ç­‰åŸå› ã€‚è®¾ç½®ä¸€ä¸ªæ—¶é—´è¿›è¡Œå¾ªç¯ç­‰å¾…ï¼Œå¦‚æœè¶…è¿‡ä¸Šé™å°±æŠ¥é”™è·³å‡º
             perror("read_num == 0");
             if (errno == EAGAIN)
             {
@@ -155,7 +155,7 @@ void requestData::handleRequest()
         }
         string now_read(buff, buff + read_num);
         content += now_read;
-        //¼ì²éURIÊÇ·ñÕıÈ·
+        //æ£€æŸ¥URIæ˜¯å¦æ­£ç¡®
         if (state == STATE_PARSE_URI)
         {
             int flag = this->parse_URI();
@@ -170,7 +170,7 @@ void requestData::handleRequest()
                 break;
             }
         }
-        //¼ì²éÍ·²¿ÊÇ·ñÕıÈ·
+        //æ£€æŸ¥å¤´éƒ¨æ˜¯å¦æ­£ç¡®
         if (state == STATE_PARSE_HEADERS)
         {
             int flag = this->parse_Headers();
@@ -193,7 +193,7 @@ void requestData::handleRequest()
                 state = STATE_ANALYSIS;
             }
         }
-        //¼ì²éÊÇ²»ÊÇ»¹ÔÚ¶ÁÈ¡£¬Èç¹ûÒÑ¾­¶ÁÈ¡Íê±Ï£¬×ªÎª·ÖÎö×´Ì¬
+        //æ£€æŸ¥æ˜¯ä¸æ˜¯è¿˜åœ¨è¯»å–ï¼Œå¦‚æœå·²ç»è¯»å–å®Œæ¯•ï¼Œè½¬ä¸ºåˆ†æçŠ¶æ€
         if (state == STATE_RECV_BODY)
         {
             int content_length = -1;
@@ -210,7 +210,7 @@ void requestData::handleRequest()
                 continue;
             state = STATE_ANALYSIS;
         }
-        //¼ì²éÊÇ²»ÊÇ»¹ÔÚ·ÖÎöÖĞ£¬·ÖÎöÍê³É£¬×ªÎªÍê³ÉÌ¬
+        //æ£€æŸ¥æ˜¯ä¸æ˜¯è¿˜åœ¨åˆ†æä¸­ï¼Œåˆ†æå®Œæˆï¼Œè½¬ä¸ºå®Œæˆæ€
         if (state == STATE_ANALYSIS)
         {
             int flag = this->analysisRequest();
@@ -238,7 +238,7 @@ void requestData::handleRequest()
         delete this;
         return;
     }
-    // ¼ÓÈëepoll¼ÌĞø
+    // åŠ å…¥epollç»§ç»­
     if (state == STATE_FINISH)
     {
         if (keep_alive)
@@ -252,8 +252,8 @@ void requestData::handleRequest()
             return;
         }
     }
-    // Ò»¶¨ÒªÏÈ¼ÓÊ±¼äĞÅÏ¢£¬·ñÔò¿ÉÄÜ»á³öÏÖ¸Õ¼Ó½øÈ¥£¬ÏÂ¸öin´¥·¢À´ÁË£¬È»ºó·ÖÀëÊ§°Üºó£¬ÓÖ¼ÓÈë¶ÓÁĞ£¬×îºó³¬Ê±±»É¾£¬È»ºóÕıÔÚÏß³ÌÖĞ½øĞĞµÄÈÎÎñ³ö´í£¬double free´íÎó¡£
-    // ĞÂÔöÊ±¼äĞÅÏ¢
+    // ä¸€å®šè¦å…ˆåŠ æ—¶é—´ä¿¡æ¯ï¼Œå¦åˆ™å¯èƒ½ä¼šå‡ºç°åˆšåŠ è¿›å»ï¼Œä¸‹ä¸ªinè§¦å‘æ¥äº†ï¼Œç„¶ååˆ†ç¦»å¤±è´¥åï¼ŒåˆåŠ å…¥é˜Ÿåˆ—ï¼Œæœ€åè¶…æ—¶è¢«åˆ ï¼Œç„¶åæ­£åœ¨çº¿ç¨‹ä¸­è¿›è¡Œçš„ä»»åŠ¡å‡ºé”™ï¼Œdouble freeé”™è¯¯ã€‚
+    // æ–°å¢æ—¶é—´ä¿¡æ¯
     pthread_mutex_lock(&qlock);
     mytimer* mtimer = new mytimer(this, 500);
     timer = mtimer;
@@ -264,29 +264,29 @@ void requestData::handleRequest()
     int ret = epoll_mod(epollfd, fd, static_cast<void*>(this), _epo_event);
     if (ret < 0)
     {
-        // ·µ»Ø´íÎó´¦Àí
+        // è¿”å›é”™è¯¯å¤„ç†
         delete this;
         return;
     }
 }
 
-//½âÎöURI£¬ÔÚÕâÖ÷Òª½ÓÊÜÁ½¸öÄÚÈİ£¬ÊÇGET»¹ÊÇPOST£¬ÒÔ¼°http°æ±¾ºÅ
+//è§£æURIï¼Œåœ¨è¿™ä¸»è¦æ¥å—ä¸¤ä¸ªå†…å®¹ï¼Œæ˜¯GETè¿˜æ˜¯POSTï¼Œä»¥åŠhttpç‰ˆæœ¬å·
 int requestData::parse_URI()
 {
     string& str = content;
-    // ¶Áµ½ÍêÕûµÄÇëÇóĞĞÔÙ¿ªÊ¼½âÎöÇëÇó
+    // è¯»åˆ°å®Œæ•´çš„è¯·æ±‚è¡Œå†å¼€å§‹è§£æè¯·æ±‚
     int pos = str.find('\r', now_read_pos);
     if (pos < 0)
     {
         return PARSE_URI_AGAIN;
     }
-    // È¥µôÇëÇóĞĞËùÕ¼µÄ¿Õ¼ä£¬½ÚÊ¡¿Õ¼ä
+    // å»æ‰è¯·æ±‚è¡Œæ‰€å çš„ç©ºé—´ï¼ŒèŠ‚çœç©ºé—´
     string request_line = str.substr(0, pos);
     if (str.size() > pos + 1)
         str = str.substr(pos + 1);
     else
         str.clear();
-    // Method£¬²é¿´ÕâÊÇÒ»¸öGET»¹ÊÇPOSTÇëÇó
+    // Methodï¼ŒæŸ¥çœ‹è¿™æ˜¯ä¸€ä¸ªGETè¿˜æ˜¯POSTè¯·æ±‚
     pos = request_line.find("GET");
     if (pos < 0)
     {
@@ -334,7 +334,7 @@ int requestData::parse_URI()
         pos = _pos;
     }
     //cout << "file_name: " << file_name << endl;
-    // HTTP °æ±¾ºÅ
+    // HTTP ç‰ˆæœ¬å·
     pos = request_line.find("/", pos);
     if (pos < 0)
     {
@@ -360,7 +360,7 @@ int requestData::parse_URI()
     state = STATE_PARSE_HEADERS;
     return PARSE_URI_SUCCESS;
 }
-//¶ÔhttpÍ·²¿½øĞĞ½âÎö,½ö½öÊÇÓÃÀ´¼ì²éÍ·²¿¸ñÊ½ÊÇ·ñÕıÈ·
+//å¯¹httpå¤´éƒ¨è¿›è¡Œè§£æ,ä»…ä»…æ˜¯ç”¨æ¥æ£€æŸ¥å¤´éƒ¨æ ¼å¼æ˜¯å¦æ­£ç¡®
 int requestData::parse_Headers()
 {
     string& str = content;
@@ -476,7 +476,7 @@ int requestData::parse_Headers()
     str = str.substr(now_read_line_begin);
     return PARSE_HEADER_AGAIN;
 }
-//´¦ÀíPOSTºÍGETÇëÇó
+//å¤„ç†POSTå’ŒGETè¯·æ±‚
 int requestData::analysisRequest()
 {
     if (method == METHOD_POST)
@@ -539,7 +539,7 @@ int requestData::analysisRequest()
         }
 
         sprintf(header, "%sContent-type: %s\r\n", header, filetype);
-        // Í¨¹ıContent-length·µ»ØÎÄ¼ş´óĞ¡
+        // é€šè¿‡Content-lengthè¿”å›æ–‡ä»¶å¤§å°
         sprintf(header, "%sContent-length: %ld\r\n", header, sbuf.st_size);
 
         sprintf(header, "%s\r\n", header);
@@ -553,7 +553,7 @@ int requestData::analysisRequest()
         char* src_addr = static_cast<char*>(mmap(NULL, sbuf.st_size, PROT_READ, MAP_PRIVATE, src_fd, 0));
         close(src_fd);
 
-        // ·¢ËÍÎÄ¼ş²¢Ğ£ÑéÍêÕûĞÔ
+        // å‘é€æ–‡ä»¶å¹¶æ ¡éªŒå®Œæ•´æ€§
         send_len = writen(fd, src_addr, sbuf.st_size);
         if (send_len != sbuf.st_size)
         {
@@ -600,8 +600,8 @@ mytimer::mytimer(requestData* _request_data, int timeout) : deleted(false), requ
     };
     */
     struct timeval now;
-    gettimeofday(&now, NULL);           //»ñµÃÎ¢Ãî¼¶µÄÊ±¼ä
-    // °Ñµ±Ç°Ê±¼äÍ³Ò»ÎªºÁÃë£¬²¢¼ÓÉÏÉèÖÃµÄÊ±¼äÉÏÏŞ
+    gettimeofday(&now, NULL);           //è·å¾—å¾®å¦™çº§çš„æ—¶é—´
+    // æŠŠå½“å‰æ—¶é—´ç»Ÿä¸€ä¸ºæ¯«ç§’ï¼Œå¹¶åŠ ä¸Šè®¾ç½®çš„æ—¶é—´ä¸Šé™
     expired_time = ((now.tv_sec * 1000) + (now.tv_usec / 1000)) + timeout;
 }
 
