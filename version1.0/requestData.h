@@ -11,9 +11,9 @@ const int STATE_FINISH = 5;
 
 const int MAX_BUFF = 4096;
 
-// ÓĞÇëÇó³öÏÖµ«ÊÇ¶Á²»µ½Êı¾İ,¿ÉÄÜÊÇRequest Aborted,
-// »òÕßÀ´×ÔÍøÂçµÄÊı¾İÃ»ÓĞ´ïµ½µÈÔ­Òò,
-// ¶ÔÕâÑùµÄÇëÇó³¢ÊÔ³¬¹ıÒ»¶¨µÄ´ÎÊı¾ÍÅ×Æú
+// æœ‰è¯·æ±‚å‡ºç°ä½†æ˜¯è¯»ä¸åˆ°æ•°æ®,å¯èƒ½æ˜¯Request Aborted,
+// æˆ–è€…æ¥è‡ªç½‘ç»œçš„æ•°æ®æ²¡æœ‰è¾¾åˆ°ç­‰åŸå› ,
+// å¯¹è¿™æ ·çš„è¯·æ±‚å°è¯•è¶…è¿‡ä¸€å®šçš„æ¬¡æ•°å°±æŠ›å¼ƒ
 const int AGAIN_MAX_TIMES = 200;
 
 const int PARSE_URI_AGAIN = -1;
@@ -61,7 +61,7 @@ enum HeadersState
 struct mytimer;
 struct requestData;
 
-//´Ë½á¹¹ÌåÓÃÓÚ¼ÇÂ¼httpÇëÇóÖĞµÄ²ÎÊı
+//æ­¤ç»“æ„ä½“ç”¨äºè®°å½•httpè¯·æ±‚ä¸­çš„å‚æ•°
 struct requestData
 {
 private:
@@ -69,7 +69,7 @@ private:
     std::string path;
     int fd;
     int epollfd;
-    // contentµÄÄÚÈİÓÃÍê¾ÍÇå
+    // contentçš„å†…å®¹ç”¨å®Œå°±æ¸…
     std::string content;
     int method;
     int HTTPversion;
