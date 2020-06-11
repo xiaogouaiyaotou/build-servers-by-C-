@@ -477,94 +477,103 @@ int requestData::parse_Headers()
     return PARSE_HEADER_AGAIN;
 }
 //处理POST和GET请求
-int requestData::analysisRequest()
-{
-    if (method == METHOD_POST)
-    {
-        //get content
-        char header[MAX_BUFF];
-        sprintf(header, "HTTP/1.1 %d %s\r\n", 200, "OK");
-        if (headers.find("Connection") != headers.end() && headers["Connection"] == "keep-alive")
-        {
-            keep_alive = true;
-            sprintf(header, "%sConnection: keep-alive\r\n", header);
-            sprintf(header, "%sKeep-Alive: timeout=%d\r\n", header, EPOLL_WAIT_TIME);
-        }
-        //cout << "content=" << content << endl;
-        // test char*
-        char* send_content = "I have receiced this.";
-
-        sprintf(header, "%sContent-length: %zu\r\n", header, strlen(send_content));
-        sprintf(header, "%s\r\n", header);
-        size_t send_len = (size_t)writen(fd, header, strlen(header));
-        if (send_len != strlen(header))
-        {
-            perror("Send header failed");
-            return ANALYSIS_ERROR;
-        }
-
-        send_len = (size_t)writen(fd, send_content, strlen(send_content));
-        if (send_len != strlen(send_content))
-        {
-            perror("Send content failed");
-            return ANALYSIS_ERROR;
-        }
-        cout << "content size ==" << content.size() << endl;
-        vector<char> data(content.begin(), content.end());
-        Mat test = imdecode(data, CV_LOAD_IMAGE_ANYDEPTH | CV_LOAD_IMAGE_ANYCOLOR);
-        imwrite("receive.bmp", test);
-        return ANALYSIS_SUCCESS;
+int requestData::analysisRequest() {
+  if (method_ == METHOD_POST) {
+    // ------------------------------------------------------
+    // My CV stitching handler which requires OpenCV library
+    // ------------------------------------------------------
+    // string header;
+    // header += string("HTTP/1.1 200 OK\r\n");
+    // if(headers_.find("Connection") != headers_.end() &&
+    // headers_["Connection"] == "Keep-Alive")
+    // {
+    //     keepAlive_ = true;
+    //     header += string("Connection: Keep-Alive\r\n") + "Keep-Alive:
+    //     timeout=" + to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
+    // }
+    // int length = stoi(headers_["Content-length"]);
+    // vector<char> data(inBuffer_.begin(), inBuffer_.begin() + length);
+    // Mat src = imdecode(data, CV_LOAD_IMAGE_ANYDEPTH|CV_LOAD_IMAGE_ANYCOLOR);
+    // //imwrite("receive.bmp", src);
+    // Mat res = stitch(src);
+    // vector<uchar> data_encode;
+    // imencode(".png", res, data_encode);
+    // header += string("Content-length: ") + to_string(data_encode.size()) +
+    // "\r\n\r\n";
+    // outBuffer_ += header + string(data_encode.begin(), data_encode.end());
+    // inBuffer_ = inBuffer_.substr(length);
+    // return ANALYSIS_SUCCESS;
+  } else if (method_ == METHOD_GET || method_ == METHOD_HEAD) {
+    string header;
+    header += "HTTP/1.1 200 OK\r\n";
+    if (headers_.find("Connection") != headers_.end() &&
+        (headers_["Connection"] == "Keep-Alive" ||
+         headers_["Connection"] == "keep-alive")) {
+      keepAlive_ = true;
+      header += string("Connection: Keep-Alive\r\n") + "Keep-Alive: timeout=" +
+                to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
     }
-    else if (method == METHOD_GET)
-    {
-        char header[MAX_BUFF];
-        sprintf(header, "HTTP/1.1 %d %s\r\n", 200, "OK");
-        if (headers.find("Connection") != headers.end() && headers["Connection"] == "keep-alive")
-        {
-            keep_alive = true;
-            sprintf(header, "%sConnection: keep-alive\r\n", header);
-            sprintf(header, "%sKeep-Alive: timeout=%d\r\n", header, EPOLL_WAIT_TIME);
-        }
-        int dot_pos = file_name.find('.');
-        const char* filetype;
-        if (dot_pos < 0)
-            filetype = MimeType::getMime("default").c_str();
-        else
-            filetype = MimeType::getMime(file_name.substr(dot_pos)).c_str();
-        struct stat sbuf;
-        if (stat(file_name.c_str(), &sbuf) < 0)
-        {
-            handleError(fd, 404, "Not Found!");
-            return ANALYSIS_ERROR;
-        }
-
-        sprintf(header, "%sContent-type: %s\r\n", header, filetype);
-        // 通过Content-length返回文件大小
-        sprintf(header, "%sContent-length: %ld\r\n", header, sbuf.st_size);
-
-        sprintf(header, "%s\r\n", header);
-        size_t send_len = (size_t)writen(fd, header, strlen(header));
-        if (send_len != strlen(header))
-        {
-            perror("Send header failed");
-            return ANALYSIS_ERROR;
-        }
-        int src_fd = open(file_name.c_str(), O_RDONLY, 0);
-        char* src_addr = static_cast<char*>(mmap(NULL, sbuf.st_size, PROT_READ, MAP_PRIVATE, src_fd, 0));
-        close(src_fd);
-
-        // 发送文件并校验完整性
-        send_len = writen(fd, src_addr, sbuf.st_size);
-        if (send_len != sbuf.st_size)
-        {
-            perror("Send file failed");
-            return ANALYSIS_ERROR;
-        }
-        munmap(src_addr, sbuf.st_size);
-        return ANALYSIS_SUCCESS;
-    }
+    int dot_pos = fileName_.find('.');
+    string filetype;
+    if (dot_pos < 0)
+      filetype = MimeType::getMime("default");
     else
-        return ANALYSIS_ERROR;
+      filetype = MimeType::getMime(fileName_.substr(dot_pos));
+
+    // echo test
+    if (fileName_ == "hello") {
+      outBuffer_ =
+          "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\n\r\nHello World";
+      return ANALYSIS_SUCCESS;
+    }
+    if (fileName_ == "favicon.ico") {
+      header += "Content-Type: image/png\r\n";
+      header += "Content-Length: " + to_string(sizeof favicon) + "\r\n";
+      header += "Server: LinYa's Web Server\r\n";
+
+      header += "\r\n";
+      outBuffer_ += header;
+      outBuffer_ += string(favicon, favicon + sizeof favicon);
+      ;
+      return ANALYSIS_SUCCESS;
+    }
+
+    struct stat sbuf;
+    if (stat(fileName_.c_str(), &sbuf) < 0) {
+      header.clear();
+      handleError(fd_, 404, "Not Found!");
+      return ANALYSIS_ERROR;
+    }
+    header += "Content-Type: " + filetype + "\r\n";
+    header += "Content-Length: " + to_string(sbuf.st_size) + "\r\n";
+    header += "Server: LinYa's Web Server\r\n";
+    // 头部结束
+    header += "\r\n";
+    outBuffer_ += header;
+
+    if (method_ == METHOD_HEAD) return ANALYSIS_SUCCESS;
+
+    int src_fd = open(fileName_.c_str(), O_RDONLY, 0);
+    if (src_fd < 0) {
+      outBuffer_.clear();
+      handleError(fd_, 404, "Not Found!");
+      return ANALYSIS_ERROR;
+    }
+    void *mmapRet = mmap(NULL, sbuf.st_size, PROT_READ, MAP_PRIVATE, src_fd, 0);
+    close(src_fd);
+    if (mmapRet == (void *)-1) {
+      munmap(mmapRet, sbuf.st_size);
+      outBuffer_.clear();
+      handleError(fd_, 404, "Not Found!");
+      return ANALYSIS_ERROR;
+    }
+    char *src_addr = static_cast<char *>(mmapRet);
+    outBuffer_ += string(src_addr, src_addr + sbuf.st_size);
+    ;
+    munmap(mmapRet, sbuf.st_size);
+    return ANALYSIS_SUCCESS;
+  }
+  return ANALYSIS_ERROR;
 }
 
 void requestData::handleError(int fd, int err_num, string short_msg)
