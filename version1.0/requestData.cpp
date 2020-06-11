@@ -505,7 +505,7 @@ int requestData::analysisRequest() {
     if (headers_.find("Connection") != headers_.end() &&
         (headers_["Connection"] == "Keep-Alive" ||
          headers_["Connection"] == "keep-alive")) {
-      keepAlive_ = true;
+      keep_alive_ = true;
       header += string("Connection: Keep-Alive\r\n") + "Keep-Alive: timeout=" +
                 to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
     }
