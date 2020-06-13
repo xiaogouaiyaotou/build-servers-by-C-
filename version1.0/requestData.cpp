@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <queue>
+#include <string.h>
 
 
 //test
