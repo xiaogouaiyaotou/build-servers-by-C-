@@ -10,7 +10,6 @@
 #include <sys/mman.h>
 #include <queue>
 
-using namespace cv;
 
 //test
 #include <iostream>
@@ -474,7 +473,7 @@ int requestData::parse_Headers()
 }
 //处理POST和GET请求
 int requestData::analysisRequest() {
-  if (method_ == METHOD_POST) {
+  if (method == METHOD_POST) {
     // ------------------------------------------------------
     // My CV stitching handler which requires OpenCV library
     // ------------------------------------------------------
