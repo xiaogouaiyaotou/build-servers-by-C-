@@ -1,5 +1,4 @@
-### 大字报
-大字报保命，求黑卫兵放过
+### 坚决拥护黑卫兵行动！
 ![image](https://github.com/xiaogouaiyaotou/build-servers-by-Cpp/blob/master/picture/guard.png)
 
 
