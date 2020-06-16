@@ -1,9 +1,3 @@
-### 坚决拥护黑卫兵行动！
-![image](https://github.com/xiaogouaiyaotou/build-servers-by-Cpp/blob/master/picture/guard.png)
-
-
-
-
 记录一下学习构建web服务器从0-1的过程
 ## version 1.0
 由于什么都不懂，掌握比较困难，在花了大量时间研究别人的代码之后总结出构建web服务器的流程图</br>
