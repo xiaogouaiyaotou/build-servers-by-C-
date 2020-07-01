@@ -266,7 +266,7 @@ void requestData::handleRequest()
     }
 }
 
-//解析URI，在这主要接受两个内容，是GET还是POST，以及http版本号
+//解析URI，GET/POST，文件路径，以及http版本号
 int requestData::parse_URI()
 {
     string& str = content;
