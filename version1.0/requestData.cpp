@@ -189,7 +189,7 @@ void requestData::handleRequest()
                 state = STATE_ANALYSIS;
             }
         }
-        //检查是不是还在读取，如果已经读取完毕，转为分析状态
+        //根据上一步的结果，如果是POST在这一步就要读取body中的内容
         if (state == STATE_RECV_BODY)
         {
             int content_length = -1;
@@ -206,7 +206,7 @@ void requestData::handleRequest()
                 continue;
             state = STATE_ANALYSIS;
         }
-        //检查是不是还在分析中，分析完成，转为完成态
+        //完成POST/GET操作之后执行
         if (state == STATE_ANALYSIS)
         {
             int flag = this->analysisRequest();
