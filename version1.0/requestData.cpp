@@ -356,7 +356,7 @@ int requestData::parse_URI()
     state = STATE_PARSE_HEADERS;
     return PARSE_URI_SUCCESS;
 }
-//对http头部进行解析,仅仅是用来检查头部格式是否正确
+//对http头部进行解析
 int requestData::parse_Headers()
 {
     string& str = content;
