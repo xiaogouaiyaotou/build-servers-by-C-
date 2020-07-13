@@ -475,30 +475,7 @@ int requestData::parse_Headers()
 //处理POST和GET请求
 int requestData::analysisRequest() {
   if (method == METHOD_POST) {
-    // ------------------------------------------------------
-    // My CV stitching handler which requires OpenCV library
-    // ------------------------------------------------------
-    // string header;
-    // header += string("HTTP/1.1 200 OK\r\n");
-    // if(headers_.find("Connection") != headers_.end() &&
-    // headers_["Connection"] == "Keep-Alive")
-    // {
-    //     keepAlive_ = true;
-    //     header += string("Connection: Keep-Alive\r\n") + "Keep-Alive:
-    //     timeout=" + to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
-    // }
-    // int length = stoi(headers_["Content-length"]);
-    // vector<char> data(inBuffer_.begin(), inBuffer_.begin() + length);
-    // Mat src = imdecode(data, CV_LOAD_IMAGE_ANYDEPTH|CV_LOAD_IMAGE_ANYCOLOR);
-    // //imwrite("receive.bmp", src);
-    // Mat res = stitch(src);
-    // vector<uchar> data_encode;
-    // imencode(".png", res, data_encode);
-    // header += string("Content-length: ") + to_string(data_encode.size()) +
-    // "\r\n\r\n";
-    // outBuffer_ += header + string(data_encode.begin(), data_encode.end());
-    // inBuffer_ = inBuffer_.substr(length);
-    // return ANALYSIS_SUCCESS;
+  
   } 
     else if (method == METHOD_GET)
     {
