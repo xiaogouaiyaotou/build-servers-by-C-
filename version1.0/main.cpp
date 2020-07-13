@@ -37,21 +37,21 @@ extern priority_queue<mytimer*, deque<mytimer*>, timerCmp> myTimerQueue;
 
 int socket_bind_listen(int port)
 {
-    // ¼ì²éportÖµ£¬È¡ÕıÈ·Çø¼ä·¶Î§
+    // æ£€æŸ¥portå€¼ï¼Œå–æ­£ç¡®åŒºé—´èŒƒå›´
     if (port < 1024 || port > 65535)
         return -1;
 
-    // ´´½¨socket(IPv4 + TCP)£¬·µ»Ø¼àÌıÃèÊö·û
+    // åˆ›å»ºsocket(IPv4 + TCP)ï¼Œè¿”å›ç›‘å¬æè¿°ç¬¦
     int listen_fd = 0;
     if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         return -1;
 
-    // Ïû³ıbindÊ±"Address already in use"´íÎó
+    // æ¶ˆé™¤bindæ—¶"Address already in use"é”™è¯¯
     int optval = 1;
     if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
         return -1;
 
-    // ÉèÖÃ·şÎñÆ÷IPºÍPort£¬ºÍ¼àÌıÃèÊö¸±°ó¶¨
+    // è®¾ç½®æœåŠ¡å™¨IPå’ŒPortï¼Œå’Œç›‘å¬æè¿°å‰¯ç»‘å®š
     struct sockaddr_in server_addr;
     bzero((char*)&server_addr, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -60,11 +60,11 @@ int socket_bind_listen(int port)
     if (bind(listen_fd, (struct sockaddr*) & server_addr, sizeof(server_addr)) == -1)
         return -1;
 
-    // ¿ªÊ¼¼àÌı£¬×î´óµÈ´ı¶ÓÁĞ³¤ÎªLISTENQ
+    // å¼€å§‹ç›‘å¬ï¼Œæœ€å¤§ç­‰å¾…é˜Ÿåˆ—é•¿ä¸ºLISTENQ
     if (listen(listen_fd, LISTENQ) == -1)
         return -1;
 
-    // ÎŞĞ§¼àÌıÃèÊö·û
+    // æ— æ•ˆç›‘å¬æè¿°ç¬¦
     if (listen_fd == -1)
     {
         close(listen_fd);
@@ -84,10 +84,10 @@ void acceptConnection(int listen_fd, int epoll_fd, const string& path)
 {
     /*
     struct sockaddr_in{
-    short int    sin_family;    //µØÖ·×å(Address Family)
-    unsigned short int    sin_port;    //16Î» TCP/UDP¶Ë¿ÚºÅ
-    struct in_addr    sin_addr;    //32Î» IPµØÖ·
-    char    sin_zero[8];    //²»Ê¹ÓÃ,¶ÔÆë×÷ÓÃ
+    short int    sin_family;    //åœ°å€æ—(Address Family)
+    unsigned short int    sin_port;    //16ä½ TCP/UDPç«¯å£å·
+    struct in_addr    sin_addr;    //32ä½ IPåœ°å€
+    char    sin_zero[8];    //ä¸ä½¿ç”¨,å¯¹é½ä½œç”¨
 
     };
     */
@@ -95,52 +95,52 @@ void acceptConnection(int listen_fd, int epoll_fd, const string& path)
     memset(&client_addr, 0, sizeof(struct sockaddr_in));
     socklen_t client_addr_len = 0;
     int accept_fd = 0;
-    //accept½ÓÊÕ³É¹¦Ö®ºó»á·µ»ØÒ»¸öĞÂµÄsocketÁ¬½Ó
+    //acceptæ¥æ”¶æˆåŠŸä¹‹åä¼šè¿”å›ä¸€ä¸ªæ–°çš„socketè¿æ¥
     while ((accept_fd = accept(listen_fd, (struct sockaddr*) & client_addr, &client_addr_len)) > 0)
     {
         /*
-        // TCPµÄ±£»î»úÖÆÄ¬ÈÏÊÇ¹Ø±ÕµÄ
+        // TCPçš„ä¿æ´»æœºåˆ¶é»˜è®¤æ˜¯å…³é—­çš„
         int optval = 0;
         socklen_t len_optval = 4;
         getsockopt(accept_fd, SOL_SOCKET,  SO_KEEPALIVE, &optval, &len_optval);
         cout << "optval ==" << optval << endl;
         */
 
-        // ÉèÎª·Ç×èÈûÄ£Ê½
+        // è®¾ä¸ºéé˜»å¡æ¨¡å¼
         int ret = setSocketNonBlocking(accept_fd);
         if (ret < 0)
         {
             perror("Set non block failed!");
             return;
         }
-        //Îª¼´½«¿ªÊ¼µÄhttpĞ­Òé½âÎö´´½¨Êı¾İ½á¹¹
+        //ä¸ºå³å°†å¼€å§‹çš„httpåè®®è§£æåˆ›å»ºæ•°æ®ç»“æ„
         requestData* req_info = new requestData(epoll_fd, accept_fd, path);
 
-        // ÎÄ¼şÃèÊö·û¿ÉÒÔ¶Á£¬±ßÔµ´¥·¢(Edge Triggered)Ä£Ê½£¬±£Ö¤Ò»¸ösocketÁ¬½ÓÔÚÈÎÒ»Ê±¿ÌÖ»±»Ò»¸öÏß³Ì´¦Àí
+        // æ–‡ä»¶æè¿°ç¬¦å¯ä»¥è¯»ï¼Œè¾¹ç¼˜è§¦å‘(Edge Triggered)æ¨¡å¼ï¼Œä¿è¯ä¸€ä¸ªsocketè¿æ¥åœ¨ä»»ä¸€æ—¶åˆ»åªè¢«ä¸€ä¸ªçº¿ç¨‹å¤„ç†
         __uint32_t _epo_event = EPOLLIN | EPOLLET | EPOLLONESHOT;
-        //addº¯ÊıµÄ¼¸¸ö²ÎÊı·Ö±ğÊÇ£¬epollµÄ´úºÅ£¬acceptµÄ´úºÅ£¬·ÖÅäµÄÊı¾İ±àºÅ£¬ÉèÖÃºÃµÄÎÄ¼şÃèÊö·û²ÎÊı
+        //addå‡½æ•°çš„å‡ ä¸ªå‚æ•°åˆ†åˆ«æ˜¯ï¼Œepollçš„ä»£å·ï¼Œacceptçš„ä»£å·ï¼Œåˆ†é…çš„æ•°æ®ç¼–å·ï¼Œè®¾ç½®å¥½çš„æ–‡ä»¶æè¿°ç¬¦å‚æ•°
         epoll_add(epoll_fd, accept_fd, static_cast<void*>(req_info), _epo_event);
-        // ĞÂÔöÊ±¼äĞÅÏ¢
+        // æ–°å¢æ—¶é—´ä¿¡æ¯
         mytimer* mtimer = new mytimer(req_info, TIMER_TIME_OUT);
         req_info->addTimer(mtimer);
         pthread_mutex_lock(&qlock);
-        //½«Æä¼ÓÈëÓÅÏÈ¶ÓÁĞ£¬ÓÅÏÈ¶ÓÁĞÓĞÒ»¸öÌØµã£¬Ã¿´Î´ÓÎ²²¿¼ÓÈëÔªËØ£¬µ«»á½«ÆäÖĞ×î´ó/×îĞ¡ÖµÖÃÓÚ¶ÓÊ×£¬ÆäÔ­ÀíÊÇ¶ÑÅÅĞò¡£´Ë´¦ÊÇĞ¡¸ù¶ÑµÄĞÎÊ½£¬Ô­ÒòÊÇĞèÒª×îÏÈ´¦Àíµô¹ıÆÚ¼°¿ì¹ıÆÚµÄ
+        //å°†å…¶åŠ å…¥ä¼˜å…ˆé˜Ÿåˆ—ï¼Œä¼˜å…ˆé˜Ÿåˆ—æœ‰ä¸€ä¸ªç‰¹ç‚¹ï¼Œæ¯æ¬¡ä»å°¾éƒ¨åŠ å…¥å…ƒç´ ï¼Œä½†ä¼šå°†å…¶ä¸­æœ€å¤§/æœ€å°å€¼ç½®äºé˜Ÿé¦–ï¼Œå…¶åŸç†æ˜¯å †æ’åºã€‚æ­¤å¤„æ˜¯å°æ ¹å †çš„å½¢å¼ï¼ŒåŸå› æ˜¯éœ€è¦æœ€å…ˆå¤„ç†æ‰è¿‡æœŸåŠå¿«è¿‡æœŸçš„
         myTimerQueue.push(mtimer);
         pthread_mutex_unlock(&qlock);
     }
     //if(accept_fd == -1)
      //   perror("accept");
 }
-// ·Ö·¢´¦Àíº¯Êı
+// åˆ†å‘å¤„ç†å‡½æ•°
 void handle_events(int epoll_fd, int listen_fd, struct epoll_event* events, int events_num, const string& path, threadpool_t* tp)
 {
     for (int i = 0; i < events_num; i++)
     {
-        // »ñÈ¡ÓĞÊÂ¼ş²úÉúµÄÃèÊö·û
+        // è·å–æœ‰äº‹ä»¶äº§ç”Ÿçš„æè¿°ç¬¦
         requestData* request = (requestData*)(events[i].data.ptr);
         int fd = request->getFd();
 
-        // ÓĞÊÂ¼ş·¢ÉúµÄÃèÊö·ûÎª¼àÌıÃèÊö·û
+        // æœ‰äº‹ä»¶å‘ç”Ÿçš„æè¿°ç¬¦ä¸ºç›‘å¬æè¿°ç¬¦
         if (fd == listen_fd)
         {
             //cout << "This is listen_fd" << endl;
@@ -148,7 +148,7 @@ void handle_events(int epoll_fd, int listen_fd, struct epoll_event* events, int 
         }
         else
         {
-            // ÅÅ³ı´íÎóÊÂ¼ş
+            // æ’é™¤é”™è¯¯äº‹ä»¶
             if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)
                 || (!(events[i].events & EPOLLIN)))
             {
@@ -157,39 +157,30 @@ void handle_events(int epoll_fd, int listen_fd, struct epoll_event* events, int 
                 continue;
             }
 
-            // ½«ÇëÇóÈÎÎñ¼ÓÈëµ½Ïß³Ì³ØÖĞ
-            // ¼ÓÈëÏß³Ì³ØÖ®Ç°½«TimerºÍrequest·ÖÀë
+            // å°†è¯·æ±‚ä»»åŠ¡åŠ å…¥åˆ°çº¿ç¨‹æ± ä¸­
+            // åŠ å…¥çº¿ç¨‹æ± ä¹‹å‰å°†Timerå’Œrequeståˆ†ç¦»
             request->seperateTimer();
             int rc = threadpool_add(tp, myHandler, events[i].data.ptr, 0);
         }
     }
 }
 
-/* ´¦ÀíÂß¼­ÊÇÕâÑùµÄ~
-ÒòÎª(1) ÓÅÏÈ¶ÓÁĞ²»Ö§³ÖËæ»ú·ÃÎÊ
-(2) ¼´Ê¹Ö§³Ö£¬Ëæ»úÉ¾³ıÄ³½ÚµãºóÆÆ»µÁË¶ÑµÄ½á¹¹£¬ĞèÒªÖØĞÂ¸üĞÂ¶Ñ½á¹¹¡£
-ËùÒÔ¶ÔÓÚ±»ÖÃÎªdeletedµÄÊ±¼ä½Úµã£¬»áÑÓ³Ùµ½Ëü(1)³¬Ê± »ò (2)ËüÇ°ÃæµÄ½Úµã¶¼±»É¾³ıÊ±£¬Ëü²Å»á±»É¾³ı¡£
-Ò»¸öµã±»ÖÃÎªdeleted,Ëü×î³Ù»áÔÚTIMER_TIME_OUTÊ±¼äºó±»É¾³ı¡£
-ÕâÑù×öÓĞÁ½¸öºÃ´¦£º
-(1) µÚÒ»¸öºÃ´¦ÊÇ²»ĞèÒª±éÀúÓÅÏÈ¶ÓÁĞ£¬Ê¡Ê±¡£
-(2) µÚ¶ş¸öºÃ´¦ÊÇ¸ø³¬Ê±Ê±¼äÒ»¸öÈİÈÌµÄÊ±¼ä£¬¾ÍÊÇÉè¶¨µÄ³¬Ê±Ê±¼äÊÇÉ¾³ıµÄÏÂÏŞ(²¢²»ÊÇÒ»µ½³¬Ê±Ê±¼ä¾ÍÁ¢¼´É¾³ı)£¬Èç¹û¼àÌıµÄÇëÇóÔÚ³¬Ê±ºóµÄÏÂÒ»´ÎÇëÇóÖĞÓÖÒ»´Î³öÏÖÁË£¬
-¾Í²»ÓÃÔÙÖØĞÂÉêÇërequestData½ÚµãÁË£¬ÕâÑù¿ÉÒÔ¼ÌĞøÖØ¸´ÀûÓÃÇ°ÃæµÄrequestData£¬¼õÉÙÁËÒ»´ÎdeleteºÍÒ»´ÎnewµÄÊ±¼ä¡£
-*/
+
 
 void handle_expired_event()
 {
-    //Ö»¼ì²é×î¶¥ÉÏµÄ£¬Èç¹û×î¶¥ÉÏµÄ¹ıÆÚÁË¾Íµ¯³ö£¬Èç¹ûÃ»¹ıÆÚ¾ÍÍË³öÑ­»·
+    //åªæ£€æŸ¥æœ€é¡¶ä¸Šçš„ï¼Œå¦‚æœæœ€é¡¶ä¸Šçš„è¿‡æœŸäº†å°±å¼¹å‡ºï¼Œå¦‚æœæ²¡è¿‡æœŸå°±é€€å‡ºå¾ªç¯
     pthread_mutex_lock(&qlock);
     while (!myTimerQueue.empty())
     {
         mytimer* ptimer_now = myTimerQueue.top();
-        //¼ì²âÊÇ·ñÒÑ¾­±»ÖÃÎª¹ıÆÚ
+        //æ£€æµ‹æ˜¯å¦å·²ç»è¢«ç½®ä¸ºè¿‡æœŸ
         if (ptimer_now->isDeleted())
         {
             myTimerQueue.pop();
             delete ptimer_now;
         }
-        //Èç¹ûÖ®Ç°Ã»¹ıÆÚ£¬¼ì²éÊÇ·ñ¹ıÆÚ
+        //å¦‚æœä¹‹å‰æ²¡è¿‡æœŸï¼Œæ£€æŸ¥æ˜¯å¦è¿‡æœŸ
         else if (ptimer_now->isvalid() == false)
         {
             myTimerQueue.pop();
@@ -205,12 +196,12 @@ void handle_expired_event()
 
 int main()
 {
-    //½«SIGPIPEÕâ¸öĞÅºÅ´¦Àíµô£¬ÒòÎªÍùÒ»¸ö¶Á¶Î¹Ø±ÕµÄ¹ÜµÀ»òsocketÁ¬½ÓÖĞĞ´Êı¾İ»á½«ÆäÒı·¢£¬µ±³ÌĞò½ÓÊÕµ½
-    //´ËĞÅºÅÊ±»á½áÊø½ø³Ì
+    //å°†SIGPIPEè¿™ä¸ªä¿¡å·å¤„ç†æ‰ï¼Œå› ä¸ºå¾€ä¸€ä¸ªè¯»æ®µå…³é—­çš„ç®¡é“æˆ–socketè¿æ¥ä¸­å†™æ•°æ®ä¼šå°†å…¶å¼•å‘ï¼Œå½“ç¨‹åºæ¥æ”¶åˆ°
+    //æ­¤ä¿¡å·æ—¶ä¼šç»“æŸè¿›ç¨‹
     handle_for_sigpipe();      
-    //´´½¨Ò»¸öÎÄ¼şÃèÊö·û
+    //åˆ›å»ºä¸€ä¸ªæ–‡ä»¶æè¿°ç¬¦
     int epoll_fd = epoll_init();
-   //Èç¹û´´½¨Ê§°Ü·µ»Ø
+   //å¦‚æœåˆ›å»ºå¤±è´¥è¿”å›
     if (epoll_fd < 0)
     {
         perror("epoll init failed");
@@ -224,20 +215,20 @@ int main()
         perror("socket bind failed");
         return 1;
     }
-    //½«listen_fdÉèÖÃÎª·Ç×èÈû£¬²¢¼ì²éÊÇ·ñ³É¹¦
+    //å°†listen_fdè®¾ç½®ä¸ºéé˜»å¡ï¼Œå¹¶æ£€æŸ¥æ˜¯å¦æˆåŠŸ
     if (setSocketNonBlocking(listen_fd) < 0)
     {
         perror("set socket non block failed");
         return 1;
     }
-    //½«epollÊÂ¼şÉèÖÃÈçÏÂ£¬epollin£¨¶ÁÊÂ¼ş£©£¬EPOLLET£¨±ßÔµ´¥·¢£©
+    //å°†epolläº‹ä»¶è®¾ç½®å¦‚ä¸‹ï¼Œepollinï¼ˆè¯»äº‹ä»¶ï¼‰ï¼ŒEPOLLETï¼ˆè¾¹ç¼˜è§¦å‘ï¼‰
     __uint32_t event = EPOLLIN | EPOLLET;
     requestData* req = new requestData();
     req->setFd(listen_fd);
     epoll_add(epoll_fd, listen_fd, static_cast<void*>(req), event);
     while (true)
     {
-        //µÈ´ıÊÂ¼şµÄ²úÉú
+        //ç­‰å¾…äº‹ä»¶çš„äº§ç”Ÿ
         int events_num = my_epoll_wait(epoll_fd, events, MAXEVENTS, -1);
         //printf("%zu\n", myTimerQueue.size());        
         if (events_num == 0)
@@ -246,7 +237,7 @@ int main()
         //printf("%zu\n", myTimerQueue.size());    
         // else
         //     cout << "one connection has come!" << endl;
-        // ±éÀúeventsÊı×é£¬¸ù¾İ¼àÌıÖÖÀà¼°ÃèÊö·ûÀàĞÍ·Ö·¢²Ù×÷
+        // éå†eventsæ•°ç»„ï¼Œæ ¹æ®ç›‘å¬ç§ç±»åŠæè¿°ç¬¦ç±»å‹åˆ†å‘æ“ä½œ
         handle_events(epoll_fd, listen_fd, events, events_num, PATH, threadpool);
 
         handle_expired_event();
