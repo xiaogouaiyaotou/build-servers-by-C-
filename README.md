@@ -6,6 +6,6 @@
 * 使用了固定线程数的线程池
 * 实现了由条件变量触发通知新任务到来的任务队列
 * 利用小根堆定时器实现了提出超时请求的功能，定时器利用STL优先队列进行管理
-* 解析HTTP的GET/POST请求以及支持长短连接
+* 解析HTTP的GET/POST请求以及支持长连接
 其大概工作流程如下
 ![image](https://github.com/xiaogouaiyaotou/build-servers-by-Cpp/blob/master/picture/server.jpeg)
